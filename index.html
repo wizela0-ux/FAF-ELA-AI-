@@ -554,7 +554,7 @@
                 if (!currentChatId) {
                     createNewChatSession(`የ ${grade}ኛ ክፍል ውይይት`);
                 }
-                appendMessage(`ስርዓት፡ የ ${grade}ኛ ክፍል መጻሕፍት ተመርጠዋል። አሁን ጥያቄዎን መጠየቅ ይችላሉ።`, 'ai-message');
+                appendMessage('የ ${grade}ኛ ክፍል መጻሕፍት ተመርጠዋል። አሁን ጥያቄዎን መጠየቅ ይችላሉ።`, 'ai-message');
                 closeSidebar(); // ምርጫው ሲያበቃ ሳይድባሩ ይገባል
             }, 300);
         }
@@ -673,7 +673,7 @@
                     }
                 }
 
-                const aiReply = foundResponse || "ይቅርታ፣ ለዚህ ጥያቄ ተዛማጅ መረጃ በኦፍላይን ዳታቤዛችን ውስጥ አልተገኘም። ኦንላይን ሲሆኑ በ Google Gemini API በሰፊው ይብራራልዎታል።";
+                const aiReply = foundResponse || "ይቅርታ፣ ለዚህ ጥያቄ ተዛማጅ መረጃ በኦፍላይን ዳታቤዛችን ውስጥ አልተገኘም። ኦንላይን ሲሆኑ በሰፊው ይብራራልዎታል።";
                 appendMessage(aiReply, 'ai-message');
                 if (currentSession) currentSession.messages.push({ text: aiReply, sender: 'ai-message' });
             }, 500);
