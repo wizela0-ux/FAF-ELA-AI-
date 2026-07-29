@@ -56,17 +56,17 @@
             display: flex;
             flex-direction: column;
             height: 100%;
-            position: fixed; /* በምስሉ ላይ ተንሳፋፊ እንዲሆን */
+            position: fixed;
             left: 0;
             top: 0;
             bottom: 0;
-            transform: translateX(-100%); /* በዲፎልት የተደበቀ */
+            transform: translateX(-100%);
             transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 200;
         }
 
         .sidebar.open {
-            transform: translateX(0); /* ሲከፈት ብቅ የሚል */
+            transform: translateX(0);
         }
 
         .sidebar-top {
@@ -165,7 +165,6 @@
             font-size: 13px;
         }
 
-        /* --- በስተጀርባ የሚዘረጋው ጥቁር ሼድ (Overlay) --- */
         .sidebar-overlay {
             position: fixed;
             top: 0;
@@ -191,7 +190,6 @@
             position: relative;
         }
 
-        /* መሃል ላይ የሆነ ሄደር ከምናሌ ቁልፍ ጋር */
         header {
             background-color: rgba(0, 0, 0, 0.05);
             padding: 15px 20px;
@@ -202,7 +200,6 @@
             backdrop-filter: blur(10px);
         }
 
-        /* የሶስት ሰረዝ ምናሌ ምልክት (Hamburger Menu) */
         .menu-toggle {
             font-size: 24px;
             background: none;
@@ -227,7 +224,7 @@
             font-size: 24px;
             font-weight: 800;
             letter-spacing: 1.5px;
-            margin: 0 auto; /* መሃል ላይ ለማድረግ */
+            margin: 0 auto;
         }
 
         .logo .white-text { color: var(--text-color); }
@@ -324,7 +321,7 @@
             display: none;
             flex-direction: column;
             gap: 15px;
-            margin-bottom: 80px;
+            margin-bottom: 100px;
         }
 
         .message {
@@ -348,6 +345,14 @@
             align-self: flex-start;
             border-bottom-left-radius: 4px;
             border: 1px solid var(--border-color);
+        }
+
+        /* ፎቶ ሲላክ የሚታይበት ስታይል */
+        .chat-image {
+            max-width: 100%;
+            border-radius: 10px;
+            margin-bottom: 5px;
+            display: block;
         }
 
         .input-area {
@@ -444,10 +449,8 @@
 </head>
 <body class="dark-theme">
 
-    <!-- 1. ጥቁር ሼድ ማደብዘዣ (Overlay) -->
     <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
 
-    <!-- 2. ተንሸራታች ሳይድባር -->
     <div class="sidebar" id="sidebar">
         <div class="sidebar-top">
             <button class="sidebar-nav-btn" onclick="startNewChat()">✨ አዲስ ቻት</button>
@@ -458,15 +461,13 @@
         <div class="sidebar-bottom">
             <div class="dev-profile">Developer: Elias Nuri</div>
             <a href="https://t.me/wizzela" target="_blank" class="contact-btn tg-btn">✈️ Contact on Telegram</a>
-            <a href="https://instagram.com/wiz_elaa" target="_blank" class="contact-btn ig-btn">🌍 Contact on Instagram</a>
+            <a href="https://instagram.com/wizelaa" target="_blank" class="contact-btn ig-btn">📸 Contact on Instagram</a>
             <button class="theme-toggle-btn" onclick="toggleTheme(event)">☀️/🌙 የቀለም ሞድ ቀይር</button>
         </div>
     </div>
 
-    <!-- 3. ዋናው የይዘት ገጽ -->
     <div class="main-content">
         <header>
-            <!-- የሶስት ሰረዝ ምልክት ቁልፍ -->
             <button class="menu-toggle" onclick="openSidebar(event)">☰</button>
             <div class="logo">
                 <span class="white-text">FAF</span> 
@@ -490,20 +491,25 @@
             <div class="chat-container" id="chat-box"></div>
 
             <div class="upload-popup" id="upload-menu">
-                <div class="upload-option" onclick="triggerUpload('ፎቶ')">📷 ፎቶ አፕሎድ</div>
-                <div class="upload-option" onclick="triggerUpload('ፋይል')">📄 ፒዲኤፍ ማያያዝ</div>
+                <div class="upload-option" onclick="document.getElementById('file-chooser').click()">📷 ፎቶ / ፋይል አፕሎድ</div>
             </div>
+
+            <!-- ለፎቶ መምረጫ የተደበቀ እውነተኛ input -->
+            <input type="file" id="file-chooser" style="display:none" accept="image/*" onchange="handleFileSelect(this)">
 
             <div class="input-area">
                 <button class="input-btn plus-btn" onclick="toggleUploadMenu(event)">+</button>
                 <textarea id="user-input" rows="1" placeholder="ጥያቄዎን እዚህ ይጻፉ..." oninput="handleInput()"></textarea>
-                <button class="input-btn voice-btn" onclick="startVoice()">🎙️</button>
+                <button class="input-btn voice-btn" id="voice-btn" onclick="startVoice()">🎙️</button>
                 <button class="input-btn send-btn" id="send-btn" onclick="sendMessage()">↑</button>
             </div>
         </div>
     </div>
 
     <script>
+        // አንተ የሰጠኸኝ እውነተኛ የ Gemini API ቁልፍ
+        const GEMINI_API_KEY = "AQ.Ab8RN6JstEJ57fP3ni-Zd3qQKWQwWnXzB6g5Eu96w7UEPq93ZA";
+
         const offlineDatabase = {
             10: {
                 "physics": [
@@ -516,6 +522,7 @@
         let chatSessions = []; 
         let currentChatId = null;
         let selectedGrade = null;
+        let attachedImageBase64 = null; // የፎቶ ዳታ መያዣ
 
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('sidebar-overlay');
@@ -526,21 +533,19 @@
         const uploadMenu = document.getElementById('upload-menu');
         const workspace = document.getElementById('main-workspace');
         const historyContainer = document.getElementById('history-container');
+        const voiceBtn = document.getElementById('voice-btn');
 
-        // ሳይድባር መክፈቻ (☰ ሲነካ)
         function openSidebar(e) {
             e.stopPropagation();
             sidebar.classList.add('open');
             overlay.classList.add('show');
         }
 
-        // ሳይድባር መዝጊያ
         function closeSidebar() {
             sidebar.classList.remove('open');
             overlay.classList.remove('show');
         }
 
-        // የክፍል ደረጃ መምረጫ
         function selectGrade(grade) {
             selectedGrade = grade;
             document.querySelectorAll('.grade-card').forEach(card => card.classList.remove('selected'));
@@ -554,8 +559,8 @@
                 if (!currentChatId) {
                     createNewChatSession(`የ ${grade}ኛ ክፍል ውይይት`);
                 }
-                appendMessage(`የ ${grade}ኛ ክፍል መጻሕፍት ተመርጠዋል። አሁን ጥያቄዎን መጠየቅ ይችላሉ።`, 'ai-message');
-                closeSidebar(); // ምርጫው ሲያበቃ ሳይድባሩ ይገባል
+                appendMessage(`ስርዓት፡ የ ${grade}ኛ ክፍል መጻሕፍት ተመርጠዋል። አሁን ጥያቄዎን መጻፍ ወይም በፎቶ/ድምፅ መጠየቅ ይችላሉ።`, 'ai-message');
+                closeSidebar();
             }, 300);
         }
 
@@ -582,7 +587,6 @@
             });
         }
 
-        // የድሮ ቻት ሲመረጥ
         function switchChatSession(id) {
             currentChatId = id;
             const session = chatSessions.find(s => s.id === id);
@@ -594,13 +598,17 @@
             chatBox.innerHTML = '';
             
             session.messages.forEach(msg => {
-                appendMessage(msg.text, msg.sender, false);
+                if(msg.image) {
+                    appendImageMessage(msg.image, msg.sender);
+                }
+                if(msg.text) {
+                    appendMessage(msg.text, msg.sender, false);
+                }
             });
             renderHistory();
-            closeSidebar(); // ቻቱ ሲቀየር ሳይድባሩ ይገባል
+            closeSidebar();
         }
 
-        // አዲስ ቻት ቁልፍ
         function startNewChat() {
             currentChatId = null;
             selectedGrade = null;
@@ -610,12 +618,13 @@
             welcomeScreen.style.display = 'flex';
             document.querySelectorAll('.grade-card').forEach(card => card.classList.remove('selected'));
             userInput.value = '';
+            attachedImageBase64 = null;
             handleInput();
-            closeSidebar(); // ወደ አዲስ ቦታ ሲመለስ ሳይድባሩ ይገባል
+            closeSidebar();
         }
 
         function handleInput() {
-            if (userInput.value.trim().length > 0) {
+            if (userInput.value.trim().length > 0 || attachedImageBase64) {
                 sendBtn.classList.add('show');
             } else {
                 sendBtn.classList.remove('show');
@@ -624,10 +633,57 @@
             userInput.style.height = userInput.scrollHeight + 'px';
         }
 
-        function sendMessage() {
-            const text = userInput.value.trim();
-            if (!text) return;
+        // ፎቶ በጋለሪ ወይም በካሜራ ሲመረጥ ወደ Base64 መቀየሪያ
+        function handleFileSelect(input) {
+            const file = input.files[0];
+            if (!file) return;
 
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                attachedImageBase64 = e.target.result;
+                sendBtn.classList.add('show');
+                alert("ፎቶው በተሳካ ሁኔታ ተያይዟል! አሁን ቀስቱን በመንካት መላክ ይችላሉ።");
+            };
+            reader.readAsDataURL(file);
+            uploadMenu.style.display = 'none';
+        }
+
+        // እውነተኛ የድ음ፅ Speech Recognition ሎጂክ
+        function startVoice() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                alert("ይቅርታ፣ የእርስዎ ስልክ የድምፅ መቀበያ ሲስተም አይደግፍም።");
+                return;
+            }
+
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'am-ET'; // አማርኛን ለመስማት
+            voiceBtn.innerText = "🛑";
+            
+            recognition.start();
+
+            recognition.onresult = function(event) {
+                const resultText = event.results[0][0].transcript;
+                userInput.value = resultText;
+                handleInput();
+            };
+
+            recognition.onend = function() {
+                voiceBtn.innerText = "🎙️";
+            };
+
+            recognition.onerror = function() {
+                voiceBtn.innerText = "🎙️";
+                alert("ድምፅዎን በትክክል መስማት አልተቻለም፣ እባክዎ እንደገና ይሞክሩ።");
+            };
+        }
+
+        // ዋናው የመልእክት መላኪያ ሎጂክ (Online Gemini + Offline Fallback)
+        async function sendMessage() {
+            const text = userInput.value.trim();
+            const currentImg = attachedImageBase64;
+
+            if (!text && !currentImg) return;
             if (!selectedGrade) {
                 alert("እባክዎ መጀመሪያ የክፍል ደረጃ ይምረጡ!");
                 return;
@@ -635,48 +691,106 @@
 
             const currentSession = chatSessions.find(s => s.id === currentChatId);
             if (currentSession && currentSession.messages.length === 0) {
-                currentSession.title = text.substring(0, 20) + (text.length > 20 ? '...' : '');
+                currentSession.title = text ? text.substring(0, 20) : "የፎቶ ጥያቄ";
                 renderHistory();
             }
 
-            appendMessage(text, 'user-message');
-            if (currentSession) currentSession.messages.push({ text: text, sender: 'user-message' });
+            // የተማሪውን ጥያቄ ስክሪን ላይ ማሳየት
+            if (currentImg) {
+                appendImageMessage(currentImg, 'user-message');
+                if (currentSession) currentSession.messages.push({ image: currentImg, sender: 'user-message' });
+            }
+            if (text) {
+                appendMessage(text, 'user-message');
+                if (currentSession) currentSession.messages.push({ text: text, sender: 'user-message' });
+            }
 
             userInput.value = '';
+            attachedImageBase64 = null;
             handleInput();
 
-            setTimeout(() => {
-                let foundResponse = null;
-                const query = text.toLowerCase();
+            appendMessage("FAF ELA AI በማሰብ ላይ...", 'ai-message');
+            const typingIndicator = chatBox.lastChild;
 
-                const gradeData = offlineDatabase[selectedGrade] ? offlineDatabase[selectedGrade]["physics"] : [];
-                if (gradeData) {
-                    for (let item of gradeData) {
-                        if (item.keywords.some(k => query.includes(k))) {
-                            foundResponse = item.response;
-                            break;
-                        }
+            // 1. የኦንላይን ሙከራ ከ Gemini API ጋር
+            if (navigator.onLine) {
+                try {
+                    let responseText = "";
+                    
+                    if (currentImg) {
+                        // የፎቶ ጥያቄ ከሆነ (Gemini 2.5 Flash)
+                        const rawData = currentImg.split(',')[1];
+                        const mimeType = currentImg.split(',')[0].split(':')[1].split(';')[0];
+                        
+                        const payload = {
+                            contents: [{
+                                parts: [
+                                    { text: `አንተ የኢትዮጵያ የ ${selectedGrade}ኛ ክፍል መጻሕፍትን የምታውቅ የ FAF ELA AI መምህር ነህ። ይህንን ምስል አይተህ በውስጡ ያለውን የትምህርት ጥያቄ በትክክል አብራራ። ${text}` },
+                                    { inlineData: { mimeType: mimeType, data: rawData } }
+                                ]
+                            }]
+                        };
+
+                        const apiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify(payload)
+                        });
+                        const resData = await apiRes.json();
+                        responseText = resData.candidates[0].content.parts[0].text;
+                    } else {
+                        // የጽሑፍ ብቻ ጥያቄ ከሆነ
+                        const payload = {
+                            contents: [{ parts: [{ text: `አንተ የኢትዮጵያ የ ${selectedGrade}ኛ ክፍል መጻሕፍትን መነሻ ያደረግክ የ FAF ELA AI መምህር ነህ። ለሚከተለው ጥያቄ በአማርኛ ማብራሪያ ስጥ፦ ${text}` }] }]
+                        };
+                        const apiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify(payload)
+                        });
+                        const resData = await apiRes.json();
+                        responseText = resData.candidates[0].content.parts[0].text;
                     }
-                }
 
-                if (!foundResponse) {
-                    for (let g in offlineDatabase) {
-                        if (g != selectedGrade && offlineDatabase[g]["physics"]) {
-                            for (let item of offlineDatabase[g]["physics"]) {
-                                if (item.keywords.some(k => query.includes(k))) {
-                                    foundResponse = `*(ከ ${g}ኛ ክፍል የተገኘ ማብራሪያ)*\n\n${item.response}`;
-                                    break;
-                                }
+                    typingIndicator.innerText = responseText;
+                    if (currentSession) currentSession.messages.push({ text: responseText, sender: 'ai-message' });
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                    return; // በተሳካ ሁኔታ ኦንላይን ከሰራ እዚህ ላይ ይቆማል
+                } catch (e) {
+                    console.log("የኦንላይን API ስህተት፣ ወደ ኦፍላይን እየቀየረ ነው...", e);
+                }
+            }
+
+            // 2. የኦፍላይን ሎጂክ (ኢንተርኔት ከሌለ ወይም API ኤረር ከሰጠ)
+            let foundResponse = null;
+            const query = text.toLowerCase();
+
+            const gradeData = offlineDatabase[selectedGrade] ? offlineDatabase[selectedGrade]["physics"] : [];
+            for (let item of gradeData) {
+                if (item.keywords.some(k => query.includes(k))) {
+                    foundResponse = item.response;
+                    break;
+                }
+            }
+
+            if (!foundResponse) {
+                for (let g in offlineDatabase) {
+                    if (g != selectedGrade && offlineDatabase[g]["physics"]) {
+                        for (let item of offlineDatabase[g]["physics"]) {
+                            if (item.keywords.some(k => query.includes(k))) {
+                                foundResponse = `*(ከ ${g}ኛ ክፍል የኦፍላይን መረጃ የተገኘ)*\n\n${item.response}`;
+                                break;
                             }
                         }
-                        if (foundResponse) break;
                     }
+                    if (foundResponse) break;
                 }
+            }
 
-                const aiReply = foundResponse || "ይቅርታ፣ ለዚህ ጥያቄ ተዛማጅ መረጃ በኦፍላይን ዳታቤዛችን ውስጥ አልተገኘም። ኦንላይን ሲሆኑ በሰፊው ይብራራልዎታል።";
-                appendMessage(aiReply, 'ai-message');
-                if (currentSession) currentSession.messages.push({ text: aiReply, sender: 'ai-message' });
-            }, 500);
+            const finalReply = foundResponse || "⚠️ አሁን ኦፍላይን ነዎት። ለዚህ ጥያቄ በኦፍላይን የተመዘገበ መረጃ አልተገኘም። እባክዎ ኢንተርኔት ያብሩ።";
+            typingIndicator.innerText = finalReply;
+            if (currentSession) currentSession.messages.push({ text: finalReply, sender: 'ai-message' });
+            chatBox.scrollTop = chatBox.scrollHeight;
         }
 
         function appendMessage(text, className, scroll = true) {
@@ -687,21 +801,23 @@
             if (scroll) chatBox.scrollTop = chatBox.scrollHeight;
         }
 
+        function appendImageMessage(src, className) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${className}`;
+            msgDiv.style.padding = '5px';
+            const img = document.createElement('img');
+            img.src = src;
+            img.className = 'chat-image';
+            msgDiv.appendChild(img);
+            chatBox.appendChild(msgDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
         function toggleUploadMenu(e) {
             e.stopPropagation();
             uploadMenu.style.display = uploadMenu.style.display === 'flex' ? 'none' : 'flex';
         }
 
-        function triggerUpload(type) {
-            alert(`${type} ለመቀበል ሲስተሙ ዝግጁ እየሆነ ነው!`);
-            uploadMenu.style.display = 'none';
-        }
-
-        function startVoice() {
-            alert("የድምፅ መቀበያ ሎጂክ በቅርቡ ይተገበራል!");
-        }
-
-        // የቀለም ሞድ መቀያየሪያ (event.stopPropagation() ታክሎበታል ሳይድባሩ እንዳይገባ)
         function toggleTheme(e) {
             e.stopPropagation();
             const body = document.body;
