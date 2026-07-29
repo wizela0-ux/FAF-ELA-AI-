@@ -48,7 +48,7 @@
             position: relative;
         }
 
-        /* --- ተንሸራታች ሳይድባር ዲዛይን --- */
+        /* --- ተንሸራታች ሳይድባር --- */
         .sidebar {
             width: 280px;
             background-color: var(--sidebar-bg);
@@ -65,15 +65,9 @@
             z-index: 200;
         }
 
-        .sidebar.open {
-            transform: translateX(0);
-        }
-
-        .sidebar-top {
-            padding: 15px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
+        .sidebar.open { transform: translateX(0); }
+        .sidebar-top { padding: 15px; border-bottom: 1px solid var(--border-color); }
+        
         .sidebar-nav-btn {
             width: 100%;
             background-color: var(--input-bg);
@@ -130,13 +124,7 @@
             gap: 10px;
         }
 
-        .dev-profile {
-            font-size: 13px;
-            text-align: center;
-            color: var(--text-muted);
-            margin-bottom: 5px;
-        }
-
+        .dev-profile { font-size: 13px; text-align: center; color: var(--text-muted); margin-bottom: 5px; }
         .contact-btn {
             width: 100%;
             padding: 10px;
@@ -151,7 +139,6 @@
             gap: 8px;
             font-size: 14px;
         }
-
         .tg-btn { background-color: #24A1DE; color: white; }
         .ig-btn { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); color: white; }
 
@@ -167,18 +154,12 @@
 
         .sidebar-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            top: 0; left: 0; right: 0; bottom: 0;
             background-color: rgba(0,0,0,0.5);
             display: none;
             z-index: 150;
         }
-
-        .sidebar-overlay.show {
-            display: block;
-        }
+        .sidebar-overlay.show { display: block; }
 
         /* --- ዋናው የስራ አካባቢ --- */
         .main-content {
@@ -211,13 +192,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 40px;
-            height: 40px;
+            width: 40px; height: 40px;
             border-radius: 50%;
-        }
-
-        .menu-toggle:hover {
-            background-color: rgba(167, 139, 250, 0.1);
         }
 
         .logo {
@@ -225,10 +201,23 @@
             font-weight: 800;
             letter-spacing: 1.5px;
             margin: 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
-
         .logo .white-text { color: var(--text-color); }
         .logo .ela-text { color: var(--ela-color); text-shadow: 0 0 10px rgba(167, 139, 250, 0.4); }
+
+        /* የኢንተርኔት ስታተስ ነጠብጣብ ዲዛይን */
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            transition: background-color 0.4s ease, box-shadow 0.4s ease;
+        }
+        .status-dot.online { background-color: #22c55e; box-shadow: 0 0 10px #22c55e; }
+        .status-dot.offline { background-color: #f97316; box-shadow: 0 0 10px #f97316; }
 
         .workspace {
             flex: 1;
@@ -321,7 +310,7 @@
             display: none;
             flex-direction: column;
             gap: 15px;
-            margin-bottom: 100px;
+            margin-bottom: 110px;
         }
 
         .message {
@@ -347,7 +336,6 @@
             border: 1px solid var(--border-color);
         }
 
-        /* ፎቶ ሲላክ የሚታይበት ስታይል */
         .chat-image {
             max-width: 100%;
             border-radius: 10px;
@@ -380,8 +368,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 42px;
-            height: 42px;
+            width: 42px; height: 42px;
             border-radius: 50%;
         }
 
@@ -404,6 +391,32 @@
             max-height: 120px;
         }
 
+        /* --- የድምፅ ዌቭ አኒሜሽን ስታይል --- */
+        .voice-wave-container {
+            display: none;
+            align-items: center;
+            gap: 4px;
+            height: 24px;
+            padding: 0 10px;
+        }
+
+        .wave-bar {
+            width: 3px;
+            height: 100%;
+            background-color: var(--ela-color);
+            border-radius: 3px;
+            animation: waveBounce 0.5s ease-in-out infinite alternate;
+        }
+        .wave-bar:nth-child(2) { animation-delay: 0.1s; }
+        .wave-bar:nth-child(3) { animation-delay: 0.2s; }
+        .wave-bar:nth-child(4) { animation-delay: 0.3s; }
+        .wave-bar:nth-child(5) { animation-delay: 0.4s; }
+
+        @keyframes waveBounce {
+            0% { transform: scaleY(0.2); }
+            100% { transform: scaleY(1.2); }
+        }
+
         .send-btn {
             background-color: var(--ela-color);
             color: #000;
@@ -422,8 +435,7 @@
 
         .upload-popup {
             position: absolute;
-            bottom: 80px;
-            left: 30px;
+            bottom: 80px; left: 30px;
             background-color: var(--chat-bg);
             border: 1px solid var(--border-color);
             border-radius: 14px;
@@ -473,6 +485,8 @@
                 <span class="white-text">FAF</span> 
                 <span class="ela-text">ELA</span> 
                 <span class="white-text">AI</span>
+                <!-- የኢንተርኔት ስታተስ ነጠብጣብ ምልክት -->
+                <span id="network-status" class="status-dot online"></span>
             </div>
         </header>
 
@@ -481,10 +495,10 @@
                 <div class="welcome-text">ዛሬ በምን ትምህርት ልረዳዎት?</div>
                 <p style="color: var(--text-muted);">ለመጀመር የክፍል ደረጃዎን ይምረጡ፦</p>
                 <div class="grade-selector">
-                    <div class="grade-card" onclick="selectGrade(9)">9ኛ ክፍል</div>
-                    <div class="grade-card" onclick="selectGrade(10)">10ኛ ክፍል</div>
-                    <div class="grade-card" onclick="selectGrade(11)">11ኛ ክፍል</div>
-                    <div class="grade-card" onclick="selectGrade(12)">12ኛ ክፍል</div>
+                    <div class="grade-card" onclick="selectGrade(9, event)">9ኛ ክፍል</div>
+                    <div class="grade-card" onclick="selectGrade(10, event)">10ኛ ክፍል</div>
+                    <div class="grade-card" onclick="selectGrade(11, event)">11ኛ ክፍል</div>
+                    <div class="grade-card" onclick="selectGrade(12, event)">12ኛ ክፍል</div>
                 </div>
             </div>
 
@@ -494,11 +508,20 @@
                 <div class="upload-option" onclick="document.getElementById('file-chooser').click()">📷 ፎቶ / ፋይል አፕሎድ</div>
             </div>
 
-            <!-- ለፎቶ መምረጫ የተደበቀ እውነተኛ input -->
             <input type="file" id="file-chooser" style="display:none" accept="image/*" onchange="handleFileSelect(this)">
 
             <div class="input-area">
                 <button class="input-btn plus-btn" onclick="toggleUploadMenu(event)">+</button>
+                
+                <!-- የድምፅ ዌቭ አኒሜሽን (ሲያወራ ብቻ ብቅ የሚል) -->
+                <div class="voice-wave-container" id="voice-wave">
+                    <div class="wave-bar"></div>
+                    <div class="wave-bar"></div>
+                    <div class="wave-bar"></div>
+                    <div class="wave-bar"></div>
+                    <div class="wave-bar"></div>
+                </div>
+
                 <textarea id="user-input" rows="1" placeholder="ጥያቄዎን እዚህ ይጻፉ..." oninput="handleInput()"></textarea>
                 <button class="input-btn voice-btn" id="voice-btn" onclick="startVoice()">🎙️</button>
                 <button class="input-btn send-btn" id="send-btn" onclick="sendMessage()">↑</button>
@@ -507,22 +530,37 @@
     </div>
 
     <script>
-        // አንተ የሰጠኸኝ እውነተኛ የ Gemini API ቁልፍ
         const GEMINI_API_KEY = "AQ.Ab8RN6JstEJ57fP3ni-Zd3qQKWQwWnXzB6g5Eu96w7UEPq93ZA";
 
+        // --- የ 54ቱ መጻሕፍት (PDFs) የተሟላ የኦፍላይን ዳታቤዝ መዋቅር ---
         const offlineDatabase = {
+            9: {
+                "physics": [{ keywords: ["work", "ስራ"], response: "በ9ኛ ክፍል ፊዚክስ መሠረት ስራ (Work) የሚሠራው ኃይል በአንድ ቁስ አካል ላይ አርፎ የቦታ ለውጥ ሲያመጣ ነው። ፎርሙላው $W = F \times d$ ነው።" }],
+                "maths": [], "chemistry": [], "biology": [], "history": [], "geography": [], "civics": [], "english": [], "amharic": [], "economics": [], "it": [], "hpe": [], "art": [] // በድምሩ 13 መጻሕፍት
+            },
             10: {
                 "physics": [
                     { keywords: ["vector", "ቬክተር", "ቬክተሮች"], response: "Vector (ቬክተር) ማለት መጠንም አቅጣጫም ያለው የፊዚክስ መጠን መገለጫ ነው። ለምሳሌ ፎርስ (Force) ማየት ይቻላል።" },
                     { keywords: ["motion", "እንቅስቃሴ"], response: "Motion (እንቅስቃሴ) ማለት አንድ ቁስ አካል በጊዜ ሂደት ውስጥ ካለበት ቦታ ወደ ሌላ ቦታ መቀየር ነው።" }
-                ]
+                ],
+                "maths": [], "chemistry": [], "biology": [], "history": [], "geography": [], "civics": [], "english": [], "amharic": [], "economics": [], "it": [], "academic_skills": [], "career_tech": [] // በድምሩ 13 መጻሕፍት
+            },
+            11: {
+                "physics": [{ keywords: ["projectile", "ፕሮጄክታይል"], response: "በ11ኛ ክፍል ፊዚክስ ምዕራፍ 2 መሠረት Projectile Motion በሁለት ዳይሜንሽን (2D) የሚደረግ የቁስ አካላት ነፃ የስበት እንቅስቃሴ ነው።" }],
+                "maths": [], "chemistry": [], "biology": [], "history": [], "geography": [], "civics": [], "english": [], "amharic": [], "economics": [], "it": [], "business": [], "technical_drawing": [], "agriculture": [], "home_science": [] // በድምሩ 14 መጻሕፍት
+            },
+            12: {
+                "physics": [{ keywords: ["quantum", "ኳንተም"], response: "በ12ኛ ክፍል ፊዚክስ መሠረት Quantum Mechanics በአቶም እና በንዑስ-አቶም ደረጃ ያሉ ጥቃቅን ቁሶችን እንቅስቃሴ የሚያጠና የፊዚክስ ክፍል ነው።" }],
+                "maths": [], "chemistry": [], "biology": [], "history": [], "geography": [], "civics": [], "english": [], "amharic": [], "economics": [], "it": [], "business": [], "technical_drawing": [], "agriculture": [], "home_science": [] // በድምሩ 14 መጻሕፍት
             }
         };
 
         let chatSessions = []; 
         let currentChatId = null;
         let selectedGrade = null;
-        let attachedImageBase64 = null; // የፎቶ ዳታ መያዣ
+        let attachedImageBase64 = null;
+        let voiceTimer = null; // የድምፅ ቆይታ ታይመር
+        let recognitionInstance = null;
 
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('sidebar-overlay');
@@ -534,6 +572,20 @@
         const workspace = document.getElementById('main-workspace');
         const historyContainer = document.getElementById('history-container');
         const voiceBtn = document.getElementById('voice-btn');
+        const voiceWave = document.getElementById('voice-wave');
+        const networkStatus = document.getElementById('network-status');
+
+        // --- የኢንተርኔት ስታተስ መከታተያ ሲስተም ---
+        function updateNetworkIndicator() {
+            if (navigator.onLine) {
+                networkStatus.className = "status-dot online";
+            } else {
+                networkStatus.className = "status-dot offline";
+            }
+        }
+        window.addEventListener('online', updateNetworkIndicator);
+        window.addEventListener('offline', updateNetworkIndicator);
+        updateNetworkIndicator(); // ለመጀመሪያ ጊዜ ሲከፈት ቼክ ለማድረግ
 
         function openSidebar(e) {
             e.stopPropagation();
@@ -546,7 +598,7 @@
             overlay.classList.remove('show');
         }
 
-        function selectGrade(grade) {
+        function selectGrade(grade, event) {
             selectedGrade = grade;
             document.querySelectorAll('.grade-card').forEach(card => card.classList.remove('selected'));
             event.currentTarget.classList.add('selected');
@@ -559,7 +611,7 @@
                 if (!currentChatId) {
                     createNewChatSession(`የ ${grade}ኛ ክፍል ውይይት`);
                 }
-                appendMessage(`ስርዓት፡ የ ${grade}ኛ ክፍል መጻሕፍት ተመርጠዋል። አሁን ጥያቄዎን መጻፍ ወይም በፎቶ/ድምፅ መጠየቅ ይችላሉ።`, 'ai-message');
+                appendMessage(`ስርዓት፡ የ ${grade}ኛ ክፍል መጻሕፍት ማውጫ ተዘጋጅቷል። አሁን ጥያቄዎን መጻፍ ወይም በፎቶ/ድምፅ መጠየቅ ይችላሉ።`, 'ai-message');
                 closeSidebar();
             }, 300);
         }
@@ -598,12 +650,8 @@
             chatBox.innerHTML = '';
             
             session.messages.forEach(msg => {
-                if(msg.image) {
-                    appendImageMessage(msg.image, msg.sender);
-                }
-                if(msg.text) {
-                    appendMessage(msg.text, msg.sender, false);
-                }
+                if(msg.image) appendImageMessage(msg.image, msg.sender);
+                if(msg.text) appendMessage(msg.text, msg.sender, false);
             });
             renderHistory();
             closeSidebar();
@@ -633,7 +681,6 @@
             userInput.style.height = userInput.scrollHeight + 'px';
         }
 
-        // ፎቶ በጋለሪ ወይም በካሜራ ሲመረጥ ወደ Base64 መቀየሪያ
         function handleFileSelect(input) {
             const file = input.files[0];
             if (!file) return;
@@ -642,43 +689,75 @@
             reader.onload = function(e) {
                 attachedImageBase64 = e.target.result;
                 sendBtn.classList.add('show');
-                alert("ፎቶው በተሳካ ሁኔታ ተያይዟል! አሁን ቀስቱን በመንካት መላክ ይችላሉ።");
+                alert("ፎቶው ዝግጁ ሆኗል! አሁን መላክ ይችላሉ።");
             };
             reader.readAsDataURL(file);
             uploadMenu.style.display = 'none';
         }
 
-        // እውነተኛ የድ음ፅ Speech Recognition ሎጂክ
+        // --- የተስተካከለ የድምፅ ሲስተም ከ 10 ሰከንድ ታይመር ጋር ---
         function startVoice() {
+            if (recognitionInstance) {
+                recognitionInstance.stop();
+                return;
+            }
+
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognition) {
                 alert("ይቅርታ፣ የእርስዎ ስልክ የድምፅ መቀበያ ሲስተም አይደግፍም።");
                 return;
             }
 
-            const recognition = new SpeechRecognition();
-            recognition.lang = 'am-ET'; // አማርኛን ለመስማት
-            voiceBtn.innerText = "🛑";
-            
-            recognition.start();
+            recognitionInstance = new SpeechRecognition();
+            recognitionInstance.lang = 'am-ET'; 
+            recognitionInstance.continuous = true;
+            recognitionInstance.interimResults = false;
 
-            recognition.onresult = function(event) {
-                const resultText = event.results[0][0].transcript;
-                userInput.value = resultText;
+            // የዝምታ መቆጣጠሪያ ታይመር (10 ሰከንድ)
+            function resetVoiceTimer() {
+                clearTimeout(voiceTimer);
+                voiceTimer = setTimeout(() => {
+                    if (recognitionInstance) {
+                        recognitionInstance.stop();
+                        alert("ለ 10 ሰከንድ ያህል ዝም ስላሉ ማይክራፎኑ በራሱ ቆሟል።");
+                    }
+                }, 10000); 
+            }
+
+            recognitionInstance.onstart = function() {
+                voiceBtn.innerText = "🛑";
+                userInput.style.display = "none";
+                voiceWave.style.display = "flex"; // የዌቭ አኒሜሽኑን ማሳየት
+                resetVoiceTimer();
+            };
+
+            recognitionInstance.onresult = function(event) {
+                const resultText = event.results[event.results.length - 1][0].transcript;
+                userInput.value += resultText + " ";
                 handleInput();
+                resetVoiceTimer(); // ተማሪው ሲያወራ ታይመሩ እንደገና ከባዶ ይቆጥራል
             };
 
-            recognition.onend = function() {
+            recognitionInstance.onend = function() {
                 voiceBtn.innerText = "🎙️";
+                userInput.style.display = "block";
+                voiceWave.style.display = "none"; // የዌቭ አኒሜሽኑን መደበቅ
+                clearTimeout(voiceTimer);
+                recognitionInstance = null;
             };
 
-            recognition.onerror = function() {
+            recognitionInstance.onerror = function() {
                 voiceBtn.innerText = "🎙️";
-                alert("ድምፅዎን በትክክል መስማት አልተቻለም፣ እባክዎ እንደገና ይሞክሩ።");
+                userInput.style.display = "block";
+                voiceWave.style.display = "none";
+                clearTimeout(voiceTimer);
+                recognitionInstance = null;
             };
+
+            recognitionInstance.start();
         }
 
-        // ዋናው የመልእክት መላኪያ ሎጂክ (Online Gemini + Offline Fallback)
+        // --- እውነተኛ የኦንላይን እና የኦፍላይን ሎጂክ ማስተካከያ ---
         async function sendMessage() {
             const text = userInput.value.trim();
             const currentImg = attachedImageBase64;
@@ -695,7 +774,6 @@
                 renderHistory();
             }
 
-            // የተማሪውን ጥያቄ ስክሪን ላይ ማሳየት
             if (currentImg) {
                 appendImageMessage(currentImg, 'user-message');
                 if (currentSession) currentSession.messages.push({ image: currentImg, sender: 'user-message' });
@@ -712,20 +790,19 @@
             appendMessage("FAF ELA AI በማሰብ ላይ...", 'ai-message');
             const typingIndicator = chatBox.lastChild;
 
-            // 1. የኦንላይን ሙከራ ከ Gemini API ጋር
+            // 1. እውነተኛ የኦንላይን ሙከራ (ኢንተርኔት ካለ ብቻ)
             if (navigator.onLine) {
                 try {
                     let responseText = "";
                     
                     if (currentImg) {
-                        // የፎቶ ጥያቄ ከሆነ (Gemini 2.5 Flash)
                         const rawData = currentImg.split(',')[1];
                         const mimeType = currentImg.split(',')[0].split(':')[1].split(';')[0];
                         
                         const payload = {
                             contents: [{
                                 parts: [
-                                    { text: `አንተ የኢትዮጵያ የ ${selectedGrade}ኛ ክፍል መጻሕፍትን የምታውቅ የ FAF ELA AI መምህር ነህ። ይህንን ምስል አይተህ በውስጡ ያለውን የትምህርት ጥያቄ በትክክል አብራራ። ${text}` },
+                                    { text: `አንተ የኢትዮጵያ የ ${selectedGrade}ኛ ክፍል መጻሕፍትን ጠንቅቀህ የምታውቅ የ FAF ELA AI መምህር ነህ። ይህንን ምስል በጥንቃቄ አይተህ በውስጡ ያለውን የትምህርት ጥያቄ ወይም ፎርሙላ በዝርዝር አብራራ። ${text}` },
                                     { inlineData: { mimeType: mimeType, data: rawData } }
                                 ]
                             }]
@@ -739,9 +816,8 @@
                         const resData = await apiRes.json();
                         responseText = resData.candidates[0].content.parts[0].text;
                     } else {
-                        // የጽሑፍ ብቻ ጥያቄ ከሆነ
                         const payload = {
-                            contents: [{ parts: [{ text: `አንተ የኢትዮጵያ የ ${selectedGrade}ኛ ክፍል መጻሕፍትን መነሻ ያደረግክ የ FAF ELA AI መምህር ነህ። ለሚከተለው ጥያቄ በአማርኛ ማብራሪያ ስጥ፦ ${text}` }] }]
+                            contents: [{ parts: [{ text: `አንተ የኢትዮጵያ የ ${selectedGrade}ኛ ክፍል አዲሱን ሰርዓተ-ትምህርት መነሻ ያደረግክ የ FAF ELA AI መምህር ነህ። ለሚከተለው ጥያቄ በአማርኛ ግልጽ ማብራሪያ ስጥ፦ ${text}` }] }]
                         };
                         const apiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
                             method: "POST",
@@ -755,32 +831,25 @@
                     typingIndicator.innerText = responseText;
                     if (currentSession) currentSession.messages.push({ text: responseText, sender: 'ai-message' });
                     chatBox.scrollTop = chatBox.scrollHeight;
-                    return; // በተሳካ ሁኔታ ኦንላይን ከሰራ እዚህ ላይ ይቆማል
+                    return; 
                 } catch (e) {
-                    console.log("የኦንላይን API ስህተት፣ ወደ ኦፍላይን እየቀየረ ነው...", e);
+                    console.log("የ API ግንኙነት ስህተት ተፈጥሯል", e);
+                    typingIndicator.innerText = "⚠️ ከኤፒአይ ሰርቨር ጋር መገናኘት አልተቻለም። እባክዎ የቪፒኤን (VPN) ግንኙነትዎን ወይም የኢንተርኔት ፍጥነትዎን ያረጋግጡ።";
+                    return;
                 }
             }
 
-            // 2. የኦፍላይን ሎጂክ (ኢንተርኔት ከሌለ ወይም API ኤረር ከሰጠ)
+            // 2. እውነተኛ የኦፍላይን ሎጂክ (ኢንተርኔት ሙሉ በሙሉ ሲጠፋ ብቻ)
             let foundResponse = null;
             const query = text.toLowerCase();
 
-            const gradeData = offlineDatabase[selectedGrade] ? offlineDatabase[selectedGrade]["physics"] : [];
-            for (let item of gradeData) {
-                if (item.keywords.some(k => query.includes(k))) {
-                    foundResponse = item.response;
-                    break;
-                }
-            }
-
-            if (!foundResponse) {
-                for (let g in offlineDatabase) {
-                    if (g != selectedGrade && offlineDatabase[g]["physics"]) {
-                        for (let item of offlineDatabase[g]["physics"]) {
-                            if (item.keywords.some(k => query.includes(k))) {
-                                foundResponse = `*(ከ ${g}ኛ ክፍል የኦፍላይን መረጃ የተገኘ)*\n\n${item.response}`;
-                                break;
-                            }
+            if (offlineDatabase[selectedGrade]) {
+                for (let subject in offlineDatabase[selectedGrade]) {
+                    const subjectData = offlineDatabase[selectedGrade][subject];
+                    for (let item of subjectData) {
+                        if (item.keywords.some(k => query.includes(k))) {
+                            foundResponse = `*(ኦፍላይን ማብራሪያ ከ ${selectedGrade}ኛ ክፍል ${subject} መጽሐፍ የተገኘ)*\n\n${item.response}`;
+                            break;
                         }
                     }
                     if (foundResponse) break;
