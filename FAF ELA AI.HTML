@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="am">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAF ELA AI</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --sidebar-bg: #181818;
+            --chat-bg: #1e1e1e;
+            --text-color: #ffffff;
+            --text-muted: #aaaaaa;
+            --ela-color: #a78bfa; 
+            --input-bg: #2d2d2d;
+            --accent-blue: #3b82f6;
+            --border-color: #2d2d2d;
+            --card-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+        }
+
+        body.light-theme {
+            --bg-color: #f3f4f6;
+            --sidebar-bg: #e5e7eb;
+            --chat-bg: #ffffff;
+            --text-color: #1f2937;
+            --text-muted: #4b5563;
+            --ela-color: #7c3aed;
+            --input-bg: #ffffff;
+            --accent-blue: #2563eb;
+            --border-color: #d1d5db;
+            --card-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* --- ተንሸራታች ሳይድባር ዲዛይን --- */
+        .sidebar {
+            width: 280px;
+            background-color: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            position: fixed; /* በምስሉ ላይ ተንሳፋፊ እንዲሆን */
+            left: 0;
+            top: 0;
+            bottom: 0;
+            transform: translateX(-100%); /* በዲፎልት የተደበቀ */
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 200;
+        }
+
+        .sidebar.open {
+            transform: translateX(0); /* ሲከፈት ብቅ የሚል */
+        }
+
+        .sidebar-top {
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-nav-btn {
+            width: 100%;
+            background-color: var(--input-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            padding: 12px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .sidebar-nav-btn:hover {
+            border-color: var(--ela-color);
+            background-color: rgba(167, 139, 250, 0.1);
+        }
+
+        .chat-history-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .history-item {
+            padding: 10px 15px;
+            background-color: transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-size: 14px;
+            color: var(--text-color);
+        }
+
+        .history-item:hover, .history-item.active {
+            background-color: var(--chat-bg);
+            border-left: 3px solid var(--ela-color);
+        }
+
+        .sidebar-bottom {
+            margin-top: auto;
+            padding: 15px;
+            border-top: 1px solid var(--border-color);
+            background-color: var(--sidebar-bg);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .dev-profile {
+            font-size: 13px;
+            text-align: center;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+        }
+
+        .contact-btn {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .tg-btn { background-color: #24A1DE; color: white; }
+        .ig-btn { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); color: white; }
+
+        .theme-toggle-btn {
+            background-color: var(--input-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            padding: 8px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        /* --- በስተጀርባ የሚዘረጋው ጥቁር ሼድ (Overlay) --- */
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.5);
+            display: none;
+            z-index: 150;
+        }
+
+        .sidebar-overlay.show {
+            display: block;
+        }
+
+        /* --- ዋናው የስራ አካባቢ --- */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            width: 100%;
+            position: relative;
+        }
+
+        /* መሃል ላይ የሆነ ሄደር ከምናሌ ቁልፍ ጋር */
+        header {
+            background-color: rgba(0, 0, 0, 0.05);
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            position: relative;
+            border-bottom: 1px solid var(--border-color);
+            backdrop-filter: blur(10px);
+        }
+
+        /* የሶስት ሰረዝ ምናሌ ምልክት (Hamburger Menu) */
+        .menu-toggle {
+            font-size: 24px;
+            background: none;
+            border: none;
+            color: var(--text-color);
+            cursor: pointer;
+            position: absolute;
+            left: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+        }
+
+        .menu-toggle:hover {
+            background-color: rgba(167, 139, 250, 0.1);
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            margin: 0 auto; /* መሃል ላይ ለማድረግ */
+        }
+
+        .logo .white-text { color: var(--text-color); }
+        .logo .ela-text { color: var(--ela-color); text-shadow: 0 0 10px rgba(167, 139, 250, 0.4); }
+
+        .workspace {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .workspace.animated-bg {
+            background: linear-gradient(-45deg, #0f0c1b, #051329, #170d24, #121212);
+            background-size: 400% 400%;
+            animation: fluidGradient 12s ease infinite;
+        }
+
+        @keyframes fluidGradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        #welcome-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px;
+            text-align: center;
+            z-index: 5;
+        }
+
+        .welcome-text {
+            font-size: 32px;
+            font-weight: 700;
+            animation: floatText 3s ease-in-out infinite, colorShift 6s infinite alternate;
+        }
+
+        @keyframes floatText {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        @keyframes colorShift {
+            0% { color: var(--text-color); }
+            50% { color: var(--ela-color); }
+            100% { color: #3b82f6; }
+        }
+
+        .grade-selector {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-top: 15px;
+            width: 100%;
+            max-width: 440px;
+        }
+
+        .grade-card {
+            background-color: var(--chat-bg);
+            border: 1px solid var(--border-color);
+            padding: 25px;
+            border-radius: 16px;
+            cursor: pointer;
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            box-shadow: var(--card-shadow);
+            transform: perspective(500px) translateZ(0);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .grade-card:hover {
+            border-color: var(--ela-color);
+            transform: perspective(500px) translateZ(15px) translateY(-5px);
+            box-shadow: 0 15px 30px rgba(167, 139, 250, 0.25);
+            background-color: rgba(167, 139, 250, 0.05);
+        }
+
+        .grade-card.selected {
+            border-color: var(--ela-color);
+            background-color: rgba(167, 139, 250, 0.15);
+            box-shadow: 0 0 15px rgba(167, 139, 250, 0.3);
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: 800px;
+            display: none;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 80px;
+        }
+
+        .message {
+            padding: 14px 18px;
+            border-radius: 18px;
+            max-width: 75%;
+            line-height: 1.6;
+            font-size: 16px;
+        }
+
+        .user-message {
+            background-color: var(--accent-blue);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+
+        .ai-message {
+            background-color: var(--chat-bg);
+            color: var(--text-color);
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+            border: 1px solid var(--border-color);
+        }
+
+        .input-area {
+            position: fixed;
+            bottom: 20px;
+            width: 90%;
+            max-width: 760px;
+            background-color: var(--input-bg);
+            border-radius: 35px;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border: 1px solid var(--border-color);
+            z-index: 10;
+        }
+
+        .input-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+        }
+
+        .input-btn:hover {
+            background-color: rgba(167, 139, 250, 0.1);
+            color: var(--ela-color);
+        }
+
+        .plus-btn { font-weight: bold; color: var(--ela-color); }
+
+        .input-area textarea {
+            flex: 1;
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 16px;
+            resize: none;
+            outline: none;
+            padding: 8px 0;
+            max-height: 120px;
+        }
+
+        .send-btn {
+            background-color: var(--ela-color);
+            color: #000;
+            transform: scale(0);
+            opacity: 0.3;
+            display: none;
+            font-weight: bold;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .send-btn.show {
+            display: flex;
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .upload-popup {
+            position: absolute;
+            bottom: 80px;
+            left: 30px;
+            background-color: var(--chat-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 10px;
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            box-shadow: var(--card-shadow);
+            z-index: 105;
+        }
+
+        .upload-option {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 8px;
+        }
+
+        .upload-option:hover {
+            background-color: rgba(167, 139, 250, 0.1);
+            color: var(--ela-color);
+        }
+    </style>
+</head>
+<body class="dark-theme">
+
+    <!-- 1. ጥቁር ሼድ ማደብዘዣ (Overlay) -->
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+    <!-- 2. ተንሸራታች ሳይድባር -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-top">
+            <button class="sidebar-nav-btn" onclick="startNewChat()">✨ አዲስ ቻት</button>
+        </div>
+        
+        <div class="chat-history-list" id="history-container"></div>
+        
+        <div class="sidebar-bottom">
+            <div class="dev-profile">Developer: Elias Nuri</div>
+            <a href="https://t.me/wizzela" target="_blank" class="contact-btn tg-btn">✈️ Contact on Telegram</a>
+            <a href="https://instagram.com/wizelaa" target="_blank" class="contact-btn ig-btn">📸 Contact on Instagram</a>
+            <button class="theme-toggle-btn" onclick="toggleTheme(event)">☀️/🌙 የቀለም ሞድ ቀይር</button>
+        </div>
+    </div>
+
+    <!-- 3. ዋናው የይዘት ገጽ -->
+    <div class="main-content">
+        <header>
+            <!-- የሶስት ሰረዝ ምልክት ቁልፍ -->
+            <button class="menu-toggle" onclick="openSidebar(event)">☰</button>
+            <div class="logo">
+                <span class="white-text">FAF</span> 
+                <span class="ela-text">ELA</span> 
+                <span class="white-text">AI</span>
+            </div>
+        </header>
+
+        <div class="workspace animated-bg" id="main-workspace">
+            <div id="welcome-screen">
+                <div class="welcome-text">ዛሬ በምን ትምህርት ልረዳዎት?</div>
+                <p style="color: var(--text-muted);">ለመጀመር የክፍል ደረጃዎን ይምረጡ፦</p>
+                <div class="grade-selector">
+                    <div class="grade-card" onclick="selectGrade(9)">9ኛ ክፍል</div>
+                    <div class="grade-card" onclick="selectGrade(10)">10ኛ ክፍል</div>
+                    <div class="grade-card" onclick="selectGrade(11)">11ኛ ክፍል</div>
+                    <div class="grade-card" onclick="selectGrade(12)">12ኛ ክፍል</div>
+                </div>
+            </div>
+
+            <div class="chat-container" id="chat-box"></div>
+
+            <div class="upload-popup" id="upload-menu">
+                <div class="upload-option" onclick="triggerUpload('ፎቶ')">📷 ፎቶ አፕሎድ</div>
+                <div class="upload-option" onclick="triggerUpload('ፋይል')">📄 ፒዲኤፍ ማያያዝ</div>
+            </div>
+
+            <div class="input-area">
+                <button class="input-btn plus-btn" onclick="toggleUploadMenu(event)">+</button>
+                <textarea id="user-input" rows="1" placeholder="ጥያቄዎን እዚህ ይጻፉ..." oninput="handleInput()"></textarea>
+                <button class="input-btn voice-btn" onclick="startVoice()">🎙️</button>
+                <button class="input-btn send-btn" id="send-btn" onclick="sendMessage()">↑</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const offlineDatabase = {
+            10: {
+                "physics": [
+                    { keywords: ["vector", "ቬክተር", "ቬክተሮች"], response: "Vector (ቬክተር) ማለት መጠንም አቅጣጫም ያለው የፊዚክስ መጠን መገለጫ ነው። ለምሳሌ ፎርስ (Force) ማየት ይቻላል።" },
+                    { keywords: ["motion", "እንቅስቃሴ"], response: "Motion (እንቅስቃሴ) ማለት አንድ ቁስ አካል በጊዜ ሂደት ውስጥ ካለበት ቦታ ወደ ሌላ ቦታ መቀየር ነው።" }
+                ]
+            }
+        };
+
+        let chatSessions = []; 
+        let currentChatId = null;
+        let selectedGrade = null;
+
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        const userInput = document.getElementById('user-input');
+        const sendBtn = document.getElementById('send-btn');
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const chatBox = document.getElementById('chat-box');
+        const uploadMenu = document.getElementById('upload-menu');
+        const workspace = document.getElementById('main-workspace');
+        const historyContainer = document.getElementById('history-container');
+
+        // ሳይድባር መክፈቻ (☰ ሲነካ)
+        function openSidebar(e) {
+            e.stopPropagation();
+            sidebar.classList.add('open');
+            overlay.classList.add('show');
+        }
+
+        // ሳይድባር መዝጊያ
+        function closeSidebar() {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('show');
+        }
+
+        // የክፍል ደረጃ መምረጫ
+        function selectGrade(grade) {
+            selectedGrade = grade;
+            document.querySelectorAll('.grade-card').forEach(card => card.classList.remove('selected'));
+            event.currentTarget.classList.add('selected');
+            
+            setTimeout(() => {
+                welcomeScreen.style.display = 'none';
+                workspace.classList.remove('animated-bg');
+                chatBox.style.display = 'flex';
+                
+                if (!currentChatId) {
+                    createNewChatSession(`የ ${grade}ኛ ክፍል ውይይት`);
+                }
+                appendMessage(`ስርዓት፡ የ ${grade}ኛ ክፍል መጻሕፍት ተመርጠዋል። አሁን ጥያቄዎን መጠየቅ ይችላሉ።`, 'ai-message');
+                closeSidebar(); // ምርጫው ሲያበቃ ሳይድባሩ ይገባል
+            }, 300);
+        }
+
+        function createNewChatSession(initialTitle) {
+            const newId = Date.now();
+            currentChatId = newId;
+            chatSessions.push({
+                id: newId,
+                title: initialTitle,
+                grade: selectedGrade,
+                messages: []
+            });
+            renderHistory();
+        }
+
+        function renderHistory() {
+            historyContainer.innerHTML = '';
+            chatSessions.forEach(session => {
+                const item = document.createElement('div');
+                item.className = `history-item ${session.id === currentChatId ? 'active' : ''}`;
+                item.innerText = session.title;
+                item.onclick = () => switchChatSession(session.id);
+                historyContainer.appendChild(item);
+            });
+        }
+
+        // የድሮ ቻት ሲመረጥ
+        function switchChatSession(id) {
+            currentChatId = id;
+            const session = chatSessions.find(s => s.id === id);
+            selectedGrade = session.grade;
+            
+            welcomeScreen.style.display = 'none';
+            workspace.classList.remove('animated-bg');
+            chatBox.style.display = 'flex';
+            chatBox.innerHTML = '';
+            
+            session.messages.forEach(msg => {
+                appendMessage(msg.text, msg.sender, false);
+            });
+            renderHistory();
+            closeSidebar(); // ቻቱ ሲቀየር ሳይድባሩ ይገባል
+        }
+
+        // አዲስ ቻት ቁልፍ
+        function startNewChat() {
+            currentChatId = null;
+            selectedGrade = null;
+            chatBox.innerHTML = '';
+            chatBox.style.display = 'none';
+            workspace.classList.add('animated-bg');
+            welcomeScreen.style.display = 'flex';
+            document.querySelectorAll('.grade-card').forEach(card => card.classList.remove('selected'));
+            userInput.value = '';
+            handleInput();
+            closeSidebar(); // ወደ አዲስ ቦታ ሲመለስ ሳይድባሩ ይገባል
+        }
+
+        function handleInput() {
+            if (userInput.value.trim().length > 0) {
+                sendBtn.classList.add('show');
+            } else {
+                sendBtn.classList.remove('show');
+            }
+            userInput.style.height = 'auto';
+            userInput.style.height = userInput.scrollHeight + 'px';
+        }
+
+        function sendMessage() {
+            const text = userInput.value.trim();
+            if (!text) return;
+
+            if (!selectedGrade) {
+                alert("እባክዎ መጀመሪያ የክፍል ደረጃ ይምረጡ!");
+                return;
+            }
+
+            const currentSession = chatSessions.find(s => s.id === currentChatId);
+            if (currentSession && currentSession.messages.length === 0) {
+                currentSession.title = text.substring(0, 20) + (text.length > 20 ? '...' : '');
+                renderHistory();
+            }
+
+            appendMessage(text, 'user-message');
+            if (currentSession) currentSession.messages.push({ text: text, sender: 'user-message' });
+
+            userInput.value = '';
+            handleInput();
+
+            setTimeout(() => {
+                let foundResponse = null;
+                const query = text.toLowerCase();
+
+                const gradeData = offlineDatabase[selectedGrade] ? offlineDatabase[selectedGrade]["physics"] : [];
+                if (gradeData) {
+                    for (let item of gradeData) {
+                        if (item.keywords.some(k => query.includes(k))) {
+                            foundResponse = item.response;
+                            break;
+                        }
+                    }
+                }
+
+                if (!foundResponse) {
+                    for (let g in offlineDatabase) {
+                        if (g != selectedGrade && offlineDatabase[g]["physics"]) {
+                            for (let item of offlineDatabase[g]["physics"]) {
+                                if (item.keywords.some(k => query.includes(k))) {
+                                    foundResponse = `*(ከ ${g}ኛ ክፍል የተገኘ ማብራሪያ)*\n\n${item.response}`;
+                                    break;
+                                }
+                            }
+                        }
+                        if (foundResponse) break;
+                    }
+                }
+
+                const aiReply = foundResponse || "ይቅርታ፣ ለዚህ ጥያቄ ተዛማጅ መረጃ በኦፍላይን ዳታቤዛችን ውስጥ አልተገኘም። ኦንላይን ሲሆኑ በ Google Gemini API በሰፊው ይብራራልዎታል።";
+                appendMessage(aiReply, 'ai-message');
+                if (currentSession) currentSession.messages.push({ text: aiReply, sender: 'ai-message' });
+            }, 500);
+        }
+
+        function appendMessage(text, className, scroll = true) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${className}`;
+            msgDiv.innerText = text;
+            chatBox.appendChild(msgDiv);
+            if (scroll) chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function toggleUploadMenu(e) {
+            e.stopPropagation();
+            uploadMenu.style.display = uploadMenu.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        function triggerUpload(type) {
+            alert(`${type} ለመቀበል ሲስተሙ ዝግጁ እየሆነ ነው!`);
+            uploadMenu.style.display = 'none';
+        }
+
+        function startVoice() {
+            alert("የድምፅ መቀበያ ሎጂክ በቅርቡ ይተገበራል!");
+        }
+
+        // የቀለም ሞድ መቀያየሪያ (event.stopPropagation() ታክሎበታል ሳይድባሩ እንዳይገባ)
+        function toggleTheme(e) {
+            e.stopPropagation();
+            const body = document.body;
+            if (body.classList.contains('dark-theme')) {
+                body.classList.remove('dark-theme');
+                body.classList.add('light-theme');
+            } else {
+                body.classList.remove('light-theme');
+                body.classList.add('dark-theme');
+            }
+        }
+
+        document.addEventListener('click', () => {
+            uploadMenu.style.display = 'none';
+        });
+    </script>
+</body>
+</html>
